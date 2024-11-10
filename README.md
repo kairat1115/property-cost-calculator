@@ -15,19 +15,21 @@ python property-cost-calculator.py
 
 # Output
 ```
-Property Price: ¥112,800,000
+Price per sqm: ¥1,852,996
+Property Price: ¥55,589,870.29030265
 
 Owner's Costs:
-Down Payment: ¥22,560,000
-Monthly Mortgage: ¥290,057
-Monthly Tax/Insurance: ¥141,000
-Monthly Maintenance: ¥94,000
-Total Monthly Cost: ¥525,057
+Down Payment: ¥11,117,974
+Monthly Mortgage: ¥142,945
+Monthly Tax/Insurance: ¥69,487
+Monthly Maintenance: ¥46,325
+Total Monthly Cost: ¥258,758
 
-5% Rule Monthly Amount: ¥470,000
+5% Rule Monthly Amount: ¥231,624
 
 Rental Analysis:
-Your Max Rent (30% of income): ¥240,000
-This covers 45.7% of owner's costs
-Recommendation: OKAY DEAL - You're paying 40-50% of owner's costs
+50% Monthly of owner's costs: ¥129,379
+Your Max Rent (30% of income): ¥120,000
+This covers 46.4% of owner's costs
+Recommendation: OKAY DEAL - You're paying [40,50)% of owner's costs
 ```
