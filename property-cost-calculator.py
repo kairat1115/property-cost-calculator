@@ -80,7 +80,7 @@ def analyze_rental_percentage(monthly_income, owner_cost):
 # suumo price per tatami (万円／平)
 # price_per_tatami = 400_0000
 
-# nomu.com - ブリリアタワー池袋
+# nomu.com - ブリリアタワー池袋 12min to station
 # ２億７８００万円 - 3ldk / 78.06sqm / 35floor
 # price_per_sqm = 2_7800_0000 / 78.06
 # ９４９０万円 - 1ldk / 37.51sqm / 9floor
@@ -92,7 +92,7 @@ def analyze_rental_percentage(monthly_income, owner_cost):
 # per tatami (平単価) - ６９８万円
 # price_per_tatami = 698_0000
 
-# athome - シティハウス西池部
+# athome - シティハウス西池部 - 15 min to station
 # １２０００万円 - 3ldk / 6476 / 5floor
 # price_per_sqm = 1_2000_0000 / 64.76
 
@@ -115,7 +115,7 @@ def analyze_rental_percentage(monthly_income, owner_cost):
 if __name__ == "__main__":
     price_per_sqm = 1_2000_0000 / 64.76
 
-    property_price = price_per_sqm * 30
+    property_price = price_per_sqm * 35
 
     # net income (after taxes)
     monthly_income = 40_0000
