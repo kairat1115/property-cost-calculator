@@ -65,57 +65,92 @@ def analyze_rental_percentage(monthly_income, owner_cost):
         'recommendation': recommendation
     }
 
-# ｘｘｘｘ    ｘｘｘｘ  ｘｘｘｘ円
-# 億ｘｘｘ    万ｘｘｘ  千ｘｘｘ円
+# ｘ    ｘｘｘｘ  ｘｘｘｘ円
+# 億    ｘｘｘ万  千ｘｘｘ円
 
-# price per sqm based on agency price / 40 sqm(?)
-# price_per_sqm = 162_5000
-
-# online aot/condo in toshima-ku
-# price_per_sqm = 92_8000
-
-# real apartment / 40
-# price_per_sqm = 237_2500
 
 # suumo price per tatami (万円／平)
 # price_per_tatami = 400_0000
-
-# nomu.com - ブリリアタワー池袋 12min to station
-# ２億７８００万円 - 3ldk / 78.06sqm / 35floor
-# price_per_sqm = 2_7800_0000 / 78.06
-# ９４９０万円 - 1ldk / 37.51sqm / 9floor
-# price_per_sqm = 9490_0000 / 37.51
-# １億２８８０万円 - 2ldk / 64.14sqm / 5floor
-# price_per_sqm = 1_2880_0000 / 64.14
-# ９６８０万円 - 1ldk / 45.41sqm / 11f
-# price_per_sqm = 9680_0000 / 45.41
 # per tatami (平単価) - ６９８万円
 # price_per_tatami = 698_0000
-
-# athome - シティハウス西池部 - 15 min to station
-# １２０００万円 - 3ldk / 6476 / 5floor
-# price_per_sqm = 1_2000_0000 / 64.76
-
 # price_per_sqm = price_per_tatami / 3.306
 
-# usual price 40sqm (rental agency said)
-# property_price = 6500_0000
-# property_price = price_per_sqm * 40
+class Apartment:
+    def __init__(self, sqm_size, floor, minutes_to_station, years):
+        self.sqm_size = sqm_size
+        self.floor = floor
+        self.minutes_to_station = minutes_to_station
+        self.years = years
 
-# usual price 35sqm(?)
-# property_price = 5687_5000
+    def get_price_per_sqm(self):
+        # Take average between ranges
+        # Within 5 minutes to station: ¥800,000 - ¥950,000 per sqm
+        if self.minutes_to_station < 6:
+            return 87_5000
+        # Within 10 minutes to station: ¥700,000 - ¥850,000 per sqm
+        if self.minutes_to_station < 11:
+            return 77_5000
+        # Within 15 minutes to station: ¥600,000 - ¥750,000 per sqm
+        if self.minutes_to_station < 16:
+            return 67_5000
+        # Within 20 minutes to station: ¥500,000 - ¥650,000 per sqm
+        if self.minutes_to_station < 21:
+            return 57_5000
+        return 0
 
-# property_price = price_per_sqm * 35
-# usual price 30sqm(?)
+    def _get_floor_coef(self, floor):
+        # Take average between ranges
+        # 1st floor: Base price
+        if floor < 2:
+            return 1.0
+        # 5th floor: +5-10% premium
+        if floor < 6:
+            return self._get_floor_coef(floor - 1) + 0.05
+        # 10th floor: +10-15% premium
+        if floor < 11:
+            return self._get_floor_coef(floor - 1) + 0.125
+        # 15th floor: +15-20% premium
+        if floor < 16:
+            return self._get_floor_coef(floor - 1) + 0.175
+        # 20th+ floor: +20-25% premium
+        return self._get_floor_coef(floor - 1) + 0.225
 
-# property_price = price_per_sqm * 30
-# 1ldk / 45.41sqm / 11f
-# property_price = 9490_0000
+    def get_coef_for_floor(self):
+        return self._get_floor_coef(self.floor)
+
+    def _get_years_coef(self, years):
+        # Base coeficient
+        if years < 1:
+            return 1.0
+        # Years 1-5: 2% decrease per year
+        if years < 6:
+            return self._get_years_coef(years - 1) - 0.02
+        # Years 6-10: 3% decrease per year
+        if years < 11:
+            return self._get_years_coef(years - 1) - 0.03
+        # Years 11-15: 4% decrease per year
+        if years < 16:
+            return self._get_years_coef(years - 1) - 0.04
+        # 16+ years: 5% decrease per year
+        return self._get_years_coef(years - 1) - 0.05
+
+    def get_coef_for_years(self):
+        return self._get_years_coef(self.years)
+
+    def get_price(self):
+        return (self.get_price_per_sqm() * self.sqm_size) * \
+            self.get_coef_for_floor() * self.get_coef_for_years()
+
 
 if __name__ == "__main__":
-    price_per_sqm = 1_2000_0000 / 64.76
+    apartment = Apartment(
+        sqm_size = 40,
+        floor = 2,
+        minutes_to_station = 15,
+        years = 2
+    )
 
-    property_price = price_per_sqm * 35
+    property_price = apartment.get_price()
 
     # net income (after taxes)
     monthly_income = 40_0000
@@ -127,7 +162,7 @@ if __name__ == "__main__":
     analysis = analyze_rental_percentage(monthly_income, costs['total_monthly_cost'])
 
     # Print results
-    print(f"Price per sqm: ¥{price_per_sqm:,.0f}")
+    # print(f"Price per sqm: ¥{price_per_sqm:,.0f}")
     print(f"Property Price: ¥{property_price:,}")
     print(f"\nOwner's Costs:")
     print(f"Down Payment: ¥{costs['down_payment']:,.0f}")
