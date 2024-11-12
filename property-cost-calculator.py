@@ -75,79 +75,85 @@ def analyze_rental_percentage(monthly_income, owner_cost):
 # price_per_tatami = 698_0000
 # price_per_sqm = price_per_tatami / 3.306
 
-class Apartment:
+# https://porty.co.jp/assess/
+class RentApartment:
     def __init__(self, sqm_size, floor, minutes_to_station, years):
         self.sqm_size = sqm_size
         self.floor = floor
         self.minutes_to_station = minutes_to_station
         self.years = years
 
-    def get_price_per_sqm(self):
-        # Take average between ranges
-        # Within 5 minutes to station: ¥800,000 - ¥950,000 per sqm
-        if self.minutes_to_station < 6:
-            return 87_5000
-        # Within 10 minutes to station: ¥700,000 - ¥850,000 per sqm
-        if self.minutes_to_station < 11:
-            return 77_5000
-        # Within 15 minutes to station: ¥600,000 - ¥750,000 per sqm
+    def get_area_price(self, sqm_size=None):
+        # 1min, 40m2, 0years, 1floor: 163,990
+        # 1min, 41m2, 0years, 1floor: 166,706
+        # 1min, 42m2, 0years, 1floor: 169,423
+        # 1min, 43m2, 0years, 1floor: 172,140
+        # 1min, 44m2, 0years, 1floor: 174,856
+        # 1min, 45m2, 0years, 1floor: 177,573
+        # 1min, 46m2, 0years, 1floor: 180,289
+        # ~2017 yen per sqm
+        if sqm_size != None:
+            s = sqm_size
+        else:
+            s = self.sqm_size
+        return s * 2017
+
+    def get_floor_price(self):
+        # 1min, 40m2, 0years, 1floor: 163,990
+        # no one likes first floor, so its different
+        # 1min, 40m2, 0years, 2floor: 167,337
+        # 1min, 40m2, 0years, 3floor: 169,010
+        # 1min, 40m2, 0years, 4floor: 170,683
+        # 1min, 40m2, 0years, 5floor: 172,357
+        # 1min, 40m2, 0years, 10floor: 180,723
+        # 1min, 40m2, 0years, 15floor: 186,580
+        # ~1670 yen diff per floor
+        if self.floor < 2:
+            return 0
+        return (self.floor - 1) * 1670
+
+    def get_station_distance_price(self):
+        # 1min, 40m2, 0years, 1floor: 163,990
+        # 2min, 40m2, 0years, 1floor: 162,981
+        # 3min, 40m2, 0years, 1floor: 161,972
+        # 4min, 40m2, 0years, 1floor: 160,963
+        # 5min, 40m2, 0years, 1floor: 159,955
+        # 10min, 40m2, 0years, 1floor: 154,911
+        # 15min, 40m2, 0years, 1floor: 149,867
+        # ~1010 yen diff per minute
+        # 20min, 40m2, 0years, 1floor: 149,816
+        # after ~10yen diff per minute
         if self.minutes_to_station < 16:
-            return 67_5000
-        # Within 20 minutes to station: ¥500,000 - ¥650,000 per sqm
-        if self.minutes_to_station < 21:
-            return 57_5000
-        return 0
+            return self.minutes_to_station * 1010
+        return (self.minutes_to_station - 15) * 10
 
-    def _get_floor_coef(self, floor):
-        # Take average between ranges
-        # 1st floor: Base price
-        if floor < 2:
-            return 1.0
-        # 5th floor: +5-10% premium
-        if floor < 6:
-            return self._get_floor_coef(floor - 1) + 0.05
-        # 10th floor: +10-15% premium
-        if floor < 11:
-            return self._get_floor_coef(floor - 1) + 0.125
-        # 15th floor: +15-20% premium
-        if floor < 16:
-            return self._get_floor_coef(floor - 1) + 0.175
-        # 20th+ floor: +20-25% premium
-        return self._get_floor_coef(floor - 1) + 0.225
-
-    def get_coef_for_floor(self):
-        return self._get_floor_coef(self.floor)
-
-    def _get_years_coef(self, years):
-        # Base coeficient
-        if years < 2:
-            return 1.0
-        # Years 1-5: 2% decrease per year
-        if years < 6:
-            return self._get_years_coef(years - 1) - 0.02
-        # Years 6-10: 3% decrease per year
-        if years < 11:
-            return self._get_years_coef(years - 1) - 0.03
-        # Years 11-15: 4% decrease per year
-        if years < 16:
-            return self._get_years_coef(years - 1) - 0.04
-        # 16+ years: 5% decrease per year
-        return self._get_years_coef(years - 1) - 0.05
-
-    def get_coef_for_years(self):
-        return self._get_years_coef(self.years)
+    def get_years_price(self):
+        # 1min, 40m2, 0years, 1floor: 163,990
+        # 1min, 40m2, 1years, 1floor: 163,127
+        # 1min, 40m2, 2years, 1floor: 162,265
+        # 1min, 40m2, 3years, 1floor: 161,402
+        # 1min, 40m2, 4years, 1floor: 160,540
+        # 1min, 40m2, 5years, 1floor: 159,677
+        # 1min, 40m2, 10years, 1floor: 155,365
+        # ~850 yen per year
+        return self.years * 850
 
     def get_price(self):
-        return (self.get_price_per_sqm() * self.sqm_size) * \
-            self.get_coef_for_floor() * self.get_coef_for_years()
+        # 1min, 40m2, 0years, 1floor: 163,990
+        # -40sqm price to get base
+        base = 16_3990 - self.get_area_price(40)
+        return base + self.get_area_price() + \
+            self.get_floor_price() - \
+            self.get_station_distance_price() - \
+            self.get_years_price()
 
 
 if __name__ == "__main__":
-    apartment = Apartment(
-        sqm_size = 40,
-        floor = 15,
+    apartment = RentApartment(
+        sqm_size = 30,
+        floor = 5,
         minutes_to_station = 15,
-        years = 8
+        years = 10
     )
 
     property_price = apartment.get_price()
@@ -166,24 +172,25 @@ if __name__ == "__main__":
     # rest - rent
 
     # Calculate costs
-    costs = calculate_property_costs(property_price)
+    # costs = calculate_property_costs(property_price)
 
     # Analyze rental situation
-    analysis = analyze_rental_percentage(monthly_income, costs['total_monthly_cost'])
+    # analysis = analyze_rental_percentage(monthly_income, costs['total_monthly_cost'])
+    analysis = analyze_rental_percentage(monthly_income, property_price)
 
     # Print results
     # print(f"Price per sqm: ¥{price_per_sqm:,.0f}")
     print(f"Property Price: ¥{property_price:,}")
-    print(f"\nOwner's Costs:")
-    print(f"Down Payment: ¥{costs['down_payment']:,.0f}")
-    print(f"Monthly Mortgage: ¥{costs['monthly_mortgage']:,.0f}")
-    print(f"Monthly Tax/Insurance: ¥{costs['monthly_tax_insurance']:,.0f}")
-    print(f"Monthly Maintenance: ¥{costs['monthly_maintenance']:,.0f}")
-    print(f"Total Monthly Cost: ¥{costs['total_monthly_cost']:,.0f}")
-    print(f"\n5% Rule Monthly Amount: ¥{costs['five_percent_monthly']:,.0f}")
+    # print(f"\nOwner's Costs:")
+    # print(f"Down Payment: ¥{costs['down_payment']:,.0f}")
+    # print(f"Monthly Mortgage: ¥{costs['monthly_mortgage']:,.0f}")
+    # print(f"Monthly Tax/Insurance: ¥{costs['monthly_tax_insurance']:,.0f}")
+    # print(f"Monthly Maintenance: ¥{costs['monthly_maintenance']:,.0f}")
+    # print(f"Total Monthly Cost: ¥{costs['total_monthly_cost']:,.0f}")
+    # print(f"\n5% Rule Monthly Amount: ¥{costs['five_percent_monthly']:,.0f}")
 
-    print(f"\nRental Analysis:")
-    print(f"50% Monthly of owner's costs: ¥{costs['total_monthly_cost'] * 0.50:,.0f}")
+    # print(f"\nRental Analysis:")
+    # print(f"50% Monthly of owner's costs: ¥{costs['total_monthly_cost'] * 0.50:,.0f}")
     print(f"Your Max Rent (30% of income): ¥{analysis['max_rent']:,.0f}")
-    print(f"This covers {analysis['percentage_of_cost']:.1f}% of owner's costs")
-    print(f"Recommendation: {analysis['recommendation']}")
+    # print(f"This covers {analysis['percentage_of_cost']:.1f}% of owner's costs")
+    # print(f"Recommendation: {analysis['recommendation']}")
