@@ -120,7 +120,7 @@ class Apartment:
 
     def _get_years_coef(self, years):
         # Base coeficient
-        if years < 1:
+        if years < 2:
             return 1.0
         # Years 1-5: 2% decrease per year
         if years < 6:
@@ -145,15 +145,25 @@ class Apartment:
 if __name__ == "__main__":
     apartment = Apartment(
         sqm_size = 40,
-        floor = 2,
+        floor = 15,
         minutes_to_station = 15,
-        years = 2
+        years = 8
     )
 
     property_price = apartment.get_price()
 
-    # net income (after taxes)
+    # gross income (before taxes)
     monthly_income = 40_0000
+    # https://www.reddit.com/r/personalfinance/wiki/housing/renting/
+    # basic recommendation to spend 30% net income on rent
+    # also can apply 50%, 30%, 20% formula to net income
+    # 50% - rent/utilities/groceries/small debt
+    # 30% - entertainment
+    # 20% - savings/debt
+    # usual deductions for 50%
+    # ４－６万 - groceries
+    # １－２万 - utilities
+    # rest - rent
 
     # Calculate costs
     costs = calculate_property_costs(property_price)
